@@ -22,7 +22,7 @@ Full-stack web application to manage user attendance and documents.
 ```bash 
 cd attendance-mgmt-back
 npm install
-npm run start:dev`
+npm run start:dev
 ```
 ### Frontend
 ```bash
