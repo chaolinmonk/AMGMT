@@ -2,3 +2,10 @@ attendance-mgmt-back/node_modules
 attendance-mgmt-front/node_modules
 attendance-mgmt-back/.env
 attendance-mgmt-front/.env
+
+node_modules/
+.env
+.env.*
+.next/
+dist/
+coverage/
