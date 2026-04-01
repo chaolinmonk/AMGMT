@@ -1,50 +1,50 @@
-CREATE TABLE "Usuarios"(
-    "id" BIGINT NOT NULL,
-    "nombre_usuario" VARCHAR(255) NOT NULL,
-    "email" VARCHAR(255) NOT NULL,
-    "password" VARCHAR(255) NOT NULL
-);
-ALTER TABLE
-    "Usuarios" ADD PRIMARY KEY("id");
-CREATE TABLE "Asistencias"(
-    "id" BIGINT NOT NULL,
-    "id_usuario" BIGINT NOT NULL,
-    "fecha" DATE NOT NULL,
-    "tipo" VARCHAR(255) NOT NULL,
-    "esAtrasado" BOOLEAN NOT NULL
-);
-ALTER TABLE
-    "Asistencias" ADD PRIMARY KEY("id");
-CREATE TABLE "Permisos"(
-    "id" BIGINT NOT NULL,
-    "tipo_permiso" VARCHAR(255) NOT NULL
-);
-ALTER TABLE
-    "Permisos" ADD PRIMARY KEY("id");
-CREATE TABLE "PermisosUsuario"(
-    "id" BIGINT NOT NULL,
-    "id_usuario" BIGINT NOT NULL,
-    "id_permiso" BIGINT NOT NULL
-);
-ALTER TABLE
-    "PermisosUsuario" ADD PRIMARY KEY("id");
-CREATE TABLE "PerfilUsuario"(
-    "id" BIGINT NOT NULL,
-    "id_usuario" BIGINT NOT NULL,
-    "pfp" VARCHAR(255) NOT NULL,
-    "id_empresa" BIGINT NOT NULL,
-    "nombre" VARCHAR(255) NOT NULL,
-    "apellido" VARCHAR(255) NOT NULL,
-    "hora_entrada" TIME(0) WITHOUT TIME ZONE NOT NULL,
-    "hora_salida" TIME(0) WITHOUT TIME ZONE NOT NULL
-);
-ALTER TABLE
-    "PerfilUsuario" ADD PRIMARY KEY("id");
-ALTER TABLE
-    "PermisosUsuario" ADD CONSTRAINT "permisosusuario_id_usuario_foreign" FOREIGN KEY("id_usuario") REFERENCES "Usuarios"("id");
-ALTER TABLE
-    "PermisosUsuario" ADD CONSTRAINT "permisosusuario_id_permiso_foreign" FOREIGN KEY("id_permiso") REFERENCES "Permisos"("id");
-ALTER TABLE
-    "Asistencias" ADD CONSTRAINT "asistencias_id_usuario_foreign" FOREIGN KEY("id_usuario") REFERENCES "Usuarios"("id");
-ALTER TABLE
-    "Usuarios" ADD CONSTRAINT "usuarios_id_foreign" FOREIGN KEY("id") REFERENCES "PerfilUsuario"("id");
+-- CREATE TABLE "Usuarios"(
+--     "id" BIGINT NOT NULL,
+--     "nombre_usuario" VARCHAR(255) NOT NULL,
+--     "email" VARCHAR(255) NOT NULL,
+--     "password" VARCHAR(255) NOT NULL
+-- );
+-- ALTER TABLE
+--     "Usuarios" ADD PRIMARY KEY("id");
+-- CREATE TABLE "Asistencias"(
+--     "id" BIGINT NOT NULL,
+--     "id_usuario" BIGINT NOT NULL,
+--     "fecha" DATE NOT NULL,
+--     "tipo" VARCHAR(255) NOT NULL,
+--     "esAtrasado" BOOLEAN NOT NULL
+-- );
+-- ALTER TABLE
+--     "Asistencias" ADD PRIMARY KEY("id");
+-- CREATE TABLE "Permisos"(
+--     "id" BIGINT NOT NULL,
+--     "tipo_permiso" VARCHAR(255) NOT NULL
+-- );
+-- ALTER TABLE
+--     "Permisos" ADD PRIMARY KEY("id");
+-- CREATE TABLE "PermisosUsuario"(
+--     "id" BIGINT NOT NULL,
+--     "id_usuario" BIGINT NOT NULL,
+--     "id_permiso" BIGINT NOT NULL
+-- );
+-- ALTER TABLE
+--     "PermisosUsuario" ADD PRIMARY KEY("id");
+-- CREATE TABLE "PerfilUsuario"(
+--     "id" BIGINT NOT NULL,
+--     "id_usuario" BIGINT NOT NULL,
+--     "pfp" VARCHAR(255) NOT NULL,
+--     "id_empresa" BIGINT NOT NULL,
+--     "nombre" VARCHAR(255) NOT NULL,
+--     "apellido" VARCHAR(255) NOT NULL,
+--     "hora_entrada" TIME(0) WITHOUT TIME ZONE NOT NULL,
+--     "hora_salida" TIME(0) WITHOUT TIME ZONE NOT NULL
+-- );
+-- ALTER TABLE
+--     "PerfilUsuario" ADD PRIMARY KEY("id");
+-- ALTER TABLE
+--     "PermisosUsuario" ADD CONSTRAINT "permisosusuario_id_usuario_foreign" FOREIGN KEY("id_usuario") REFERENCES "Usuarios"("id");
+-- ALTER TABLE
+--     "PermisosUsuario" ADD CONSTRAINT "permisosusuario_id_permiso_foreign" FOREIGN KEY("id_permiso") REFERENCES "Permisos"("id");
+-- ALTER TABLE
+--     "Asistencias" ADD CONSTRAINT "asistencias_id_usuario_foreign" FOREIGN KEY("id_usuario") REFERENCES "Usuarios"("id");
+-- ALTER TABLE
+--     "Usuarios" ADD CONSTRAINT "usuarios_id_foreign" FOREIGN KEY("id") REFERENCES "PerfilUsuario"("id");
