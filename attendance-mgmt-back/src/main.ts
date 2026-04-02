@@ -1,12 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-
+import { BigIntInterceptor } from './common/bigint.interceptor';
 // Swagger
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.useGlobalInterceptors(new BigIntInterceptor());
+  
   const config = new DocumentBuilder()
     .setTitle('Attendance Management API')
     .setDescription('API para gestión de asistencia')
