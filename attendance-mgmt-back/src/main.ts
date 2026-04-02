@@ -21,6 +21,6 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document); 
   // URL: http://localhost:3000/api
 
-  await app.listen(3000);
+  await app.listen(3000, '0.0.0.0');
 }
 bootstrap();
