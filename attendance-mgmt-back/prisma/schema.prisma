@@ -1,40 +1,38 @@
 generator client {
   provider = "prisma-client-js"
+  engineType = "binary" // 🔥 CLAVE
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
-
 model Usuario {
-  id             BigInt       @id @default(autoincrement())
+  id             BigInt         @id @default(autoincrement())
   nombre_usuario String
-  email          String       @unique
+  email          String         @unique
   password       String
-
-  perfil         PerfilUsuario?
   asistencias    Asistencia[]
+  perfil         PerfilUsuario?
 }
 
 model PerfilUsuario {
-  id            BigInt   @id @default(autoincrement())
-  usuarioId     BigInt   @unique
-  pfp           String
-  id_empresa    BigInt
-  nombre        String
-  apellido      String
-  hora_entrada  DateTime
-  hora_salida   DateTime
-
-  usuario       Usuario  @relation(fields: [usuarioId], references: [id])
+  id           BigInt   @id @default(autoincrement())
+  usuarioId    BigInt   @unique
+  pfp          String
+  id_empresa   BigInt
+  nombre       String
+  apellido     String
+  hora_entrada DateTime
+  hora_salida  DateTime
+  usuario      Usuario  @relation(fields: [usuarioId], references: [id])
 }
 
 model Asistencia {
-  id           BigInt   @id @default(autoincrement())
-  usuarioId    BigInt
-  fecha        DateTime
-  tipo         String   // "entrada" | "salida"
-  esAtrasado   Boolean
-
-  usuario      Usuario  @relation(fields: [usuarioId], references: [id])
+  id         BigInt   @id @default(autoincrement())
+  usuarioId  BigInt
+  fecha      DateTime
+  tipo       String
+  esAtrasado Boolean
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id])
 }

@@ -6,7 +6,9 @@ import { UsersModule } from './users/users.module';
 import { LoginModule } from './login/login.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), UsersModule, LoginModule],
+  imports: [ConfigModule.forRoot({
+    isGlobal: true,
+  }), UsersModule, LoginModule],
   controllers: [AppController],
   providers: [AppService],
 })
