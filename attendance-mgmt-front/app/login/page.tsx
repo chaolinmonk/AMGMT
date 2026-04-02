@@ -1,9 +1,18 @@
 "use client"
 import LoginForm from "@/components/forms/LoginForm";
+import './login.css'
+
 export default function Home() {
   return (
-    <div className="grid grid-cols-6 grid-rows-6 h-screen gap-2">
-      <LoginForm/>
+    <div className="">
+        <div className=" bg-indigo-900 header">
+        <p>AssistanceMGMT</p>
+      </div>
+      <div className="main">
+      <div className="form">
+        <LoginForm/>
+      </div>
+    </div>
     </div>
   );
 }
