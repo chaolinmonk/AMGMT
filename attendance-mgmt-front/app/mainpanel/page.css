@@ -1,0 +1,47 @@
+.main{
+    /* display: flex; */
+    
+}
+.header{
+    font-size: 2.5rem;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 10%;
+    border-bottom: 10px solid white;
+}
+.navegacion{
+    width: 15%;
+    height: 90%;
+    position:fixed;
+    border: 2px solid black;
+}
+.navegacionBtn{
+    border-bottom: 1px solid black;
+
+}
+.navegacionBtn:hover{
+    background-color: #312e814b;
+    transform: scale(1.1);
+    transition: transform 0.1s ease;
+
+}
+
+.panel{
+    border: 2px solid black;
+    margin-left: 15%;
+    display: flex;
+    flex-direction: column;
+    background-color: #312e81;
+}
+.btnMarca{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 10px 0 10px 0;
+}
+.btnMarca button:hover{
+    transform: scale(1.2);
+    transition: transform 0.1s ease;
+}

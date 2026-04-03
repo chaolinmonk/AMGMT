@@ -45,18 +45,18 @@ export default function LoginForm() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="col-start-3 col-span-2 row-start-2 row-span-3 rounded-lg bg-gray-100 
-      flex justify-center
+      className=" rounded-lg bg-gray-100 
+      
       font-sans text-black font-medium"
     >
-      <div className="w-4/5 grid grid-cols-1 grid-rows-6">
-        <div className="row-span-1 flex items-center justify-center">
+      <div className="form">
+        <div className="">
           Iniciar Sesión
         </div>
         {/* Email */}
-        <div className="row-span-1 flex flex-col justify-center">
-          <p className=" h-20">Email</p>
-          <div className="flex justify-center h-50">
+        <div className="">
+          <p className="">Email</p>
+          <div className="">
             <EmailInput
               {...register("email", {
                 required: "Email requerido",
@@ -73,9 +73,9 @@ export default function LoginForm() {
         </div>
 
         {/* Password */}
-        <div className="row-span-1 flex flex-col justify-center">
-          <p className=" h-20">Contraseña</p>
-          <div className="flex justify-center h-50">
+        <div className="">
+          <p className=" ">Contraseña</p>
+          <div className="">
             <DefaultInput
               type="password"
               {...register("password", {
