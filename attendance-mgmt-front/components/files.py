@@ -1,6 +1,6 @@
 import os
 
-output_file = "proyecto.txt"
+output_file = "components.txt"
 script_name = os.path.basename(__file__)
 base_dir = os.path.dirname(os.path.abspath(__file__))
 

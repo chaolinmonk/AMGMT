@@ -1,0 +1,1116 @@
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\app.controller.spec.ts
+============================================================
+import { Test, TestingModule } from '@nestjs/testing';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+
+describe('AppController', () => {
+  let appController: AppController;
+
+  beforeEach(async () => {
+    const app: TestingModule = await Test.createTestingModule({
+      controllers: [AppController],
+      providers: [AppService],
+    }).compile();
+
+    appController = app.get<AppController>(AppController);
+  });
+
+  describe('root', () => {
+    it('should return "Hello World!"', () => {
+      expect(appController.getHello()).toBe('Hello World!');
+    });
+  });
+});
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\app.controller.ts
+============================================================
+import { Controller, Get } from '@nestjs/common';
+import { AppService } from './app.service';
+
+@Controller()
+export class AppController {
+  constructor(private readonly appService: AppService) {}
+
+  @Get()
+  getHello(): string {
+    return this.appService.getHello();
+  }
+}
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\app.module.ts
+============================================================
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
+import { UsersModule } from './users/users.module';
+import { LoginModule } from './login/login.module';
+import { AssistanceModule } from './assistance/assistance.module';
+import { UserprofileModule } from './userprofile/userprofile.module';
+import { RegisterModule } from './register/register.module';
+
+@Module({
+  imports: [ConfigModule.forRoot({
+    isGlobal: true,
+  }), UsersModule, LoginModule, AssistanceModule, UserprofileModule, RegisterModule],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {}
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\app.service.ts
+============================================================
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class AppService {
+  getHello(): string {
+    return 'Hello World!';
+  }
+}
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\main.ts
+============================================================
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { BigIntInterceptor } from './common/bigint.interceptor';
+// Swagger
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  app.enableCors(); 
+
+  app.useGlobalInterceptors(new BigIntInterceptor());
+
+  const config = new DocumentBuilder()
+    .setTitle('Attendance Management API')
+    .setDescription('API para gestión de asistencia')
+    .setVersion('1.0')
+    .addTag('attendance')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+
+  SwaggerModule.setup('api', app, document);
+
+  await app.listen(3000);
+
+}
+bootstrap();
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\assistance\assistance.controller.spec.ts
+============================================================
+import { Test, TestingModule } from '@nestjs/testing';
+import { AssistanceController } from './assistance.controller';
+import { AssistanceService } from './assistance.service';
+
+describe('AssistanceController', () => {
+  let controller: AssistanceController;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [AssistanceController],
+      providers: [AssistanceService],
+    }).compile();
+
+    controller = module.get<AssistanceController>(AssistanceController);
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+});
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\assistance\assistance.controller.ts
+============================================================
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { AssistanceService } from './assistance.service';
+import { CreateAssistanceDto } from './dto/create-assistance.dto';
+import { UpdateAssistanceDto } from './dto/update-assistance.dto';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+
+@ApiTags('assistance')
+@Controller('assistance')
+export class AssistanceController {
+  constructor(private readonly assistanceService: AssistanceService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Registrar asistencia' })
+  create(@Body() createAssistanceDto: CreateAssistanceDto) {
+    return this.assistanceService.create(createAssistanceDto);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Obtener todas las asistencias' })
+  findAll() {
+    return this.assistanceService.findAll();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtener asistencia por ID' })
+  findOne(@Param('id') id: string) {
+    return this.assistanceService.findOne(+id);
+  }
+
+  @Get('usuario/:usuarioId')
+  @ApiOperation({ summary: 'Obtener asistencias por usuario' })
+  findByUsuario(@Param('usuarioId') usuarioId: string) {
+    return this.assistanceService.findByUsuario(+usuarioId);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Actualizar asistencia' })
+  update(@Param('id') id: string, @Body() updateAssistanceDto: UpdateAssistanceDto) {
+    return this.assistanceService.update(+id, updateAssistanceDto);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Eliminar asistencia' })
+  remove(@Param('id') id: string) {
+    return this.assistanceService.remove(+id);
+  }
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\assistance\assistance.module.ts
+============================================================
+import { Module } from '@nestjs/common';
+import { AssistanceService } from './assistance.service';
+import { AssistanceController } from './assistance.controller';
+import { PrismaModule } from 'src/prisma/prisma.module';
+
+@Module({
+  imports: [PrismaModule],
+  controllers: [AssistanceController],
+  providers: [AssistanceService],
+})
+export class AssistanceModule {}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\assistance\assistance.service.spec.ts
+============================================================
+import { Test, TestingModule } from '@nestjs/testing';
+import { AssistanceService } from './assistance.service';
+
+describe('AssistanceService', () => {
+  let service: AssistanceService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [AssistanceService],
+    }).compile();
+
+    service = module.get<AssistanceService>(AssistanceService);
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+});
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\assistance\assistance.service.ts
+============================================================
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateAssistanceDto } from './dto/create-assistance.dto';
+import { UpdateAssistanceDto } from './dto/update-assistance.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+
+@Injectable()
+export class AssistanceService {
+  constructor(private prisma: PrismaService) {}
+
+  c
+  async create(createAssistanceDto: CreateAssistanceDto) {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id: createAssistanceDto.usuarioId },
+    });
+    if (!usuario) throw new NotFoundException(`Usuario #${createAssistanceDto.usuarioId} no existe`);
+
+    return this.prisma.asistencia.create({
+      data: createAssistanceDto,
+    });
+  }
+
+  findAll() {
+    return this.prisma.asistencia.findMany({
+      include: { usuario: true },
+    });
+  }
+
+  async findOne(id: number) {
+    const asistencia = await this.prisma.asistencia.findUnique({
+      where: { id },
+      include: { usuario: true },
+    });
+    if (!asistencia) throw new NotFoundException(`Asistencia #${id} no encontrada`);
+    return asistencia;
+  }
+
+  async findByUsuario(usuarioId: number) {
+    return this.prisma.asistencia.findMany({
+      where: { usuarioId },
+      orderBy: { fecha: 'desc' },
+    });
+  }
+
+  async update(id: number, updateAssistanceDto: UpdateAssistanceDto) {
+    await this.findOne(id);
+    return this.prisma.asistencia.update({
+      where: { id },
+      data: updateAssistanceDto,
+    });
+  }
+
+  async remove(id: number) {
+    await this.findOne(id);
+    return this.prisma.asistencia.delete({
+      where: { id },
+    });
+  }
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\assistance\dto\create-assistance.dto.ts
+============================================================
+import { ApiProperty } from '@nestjs/swagger';
+
+export class CreateAssistanceDto {
+  @ApiProperty({ example: '1' })
+  usuarioId: bigint;
+
+  @ApiProperty({ example: '2026-04-02T08:00:00.000Z' })
+  fecha: Date;
+
+  @ApiProperty({ example: 'entrada' })
+  tipo: string;
+
+  @ApiProperty({ example: false })
+  esAtrasado: boolean;
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\assistance\dto\update-assistance.dto.ts
+============================================================
+import { PartialType } from '@nestjs/swagger';
+import { CreateAssistanceDto } from './create-assistance.dto';
+
+export class UpdateAssistanceDto extends PartialType(CreateAssistanceDto) {}
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\assistance\entities\assistance.entity.ts
+============================================================
+export class Assistance {}
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\common\bigint.interceptor.ts
+============================================================
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+@Injectable()
+export class BigIntInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    return next.handle().pipe(
+      map(data => JSON.parse(JSON.stringify(data, (_, v) =>
+        typeof v === 'bigint' ? v.toString() : v
+      )))
+    );
+  }
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\login\login.controller.spec.ts
+============================================================
+import { Test, TestingModule } from '@nestjs/testing';
+import { LoginController } from './login.controller';
+import { LoginService } from './login.service';
+
+describe('LoginController', () => {
+  let controller: LoginController;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [LoginController],
+      providers: [LoginService],
+    }).compile();
+
+    controller = module.get<LoginController>(LoginController);
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+});
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\login\login.controller.ts
+============================================================
+import { Controller, Post, Body } from '@nestjs/common';
+import { LoginService } from './login.service';
+import { CreateLoginDto } from './dto/create-login.dto';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+
+@ApiTags('login')
+@Controller('login')
+export class LoginController {
+  constructor(private readonly loginService: LoginService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Iniciar sesión' })
+  login(@Body() createLoginDto: CreateLoginDto) {
+    return this.loginService.login(createLoginDto);
+  }
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\login\login.module.ts
+============================================================
+import { Module } from '@nestjs/common';
+import { LoginService } from './login.service';
+import { LoginController } from './login.controller';
+import { PrismaModule } from 'src/prisma/prisma.module';
+import { JwtModule } from '@nestjs/jwt';
+
+@Module({
+  imports: [
+    PrismaModule,
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '8h' },
+    }),
+  ],
+  controllers: [LoginController],
+  providers: [LoginService],
+})
+export class LoginModule {}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\login\login.service.spec.ts
+============================================================
+import { Test, TestingModule } from '@nestjs/testing';
+import { LoginService } from './login.service';
+
+describe('LoginService', () => {
+  let service: LoginService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [LoginService],
+    }).compile();
+
+    service = module.get<LoginService>(LoginService);
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+});
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\login\login.service.ts
+============================================================
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { CreateLoginDto } from './dto/create-login.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+
+@Injectable()
+export class LoginService {
+  constructor(
+    private prisma: PrismaService,
+    private jwtService: JwtService,
+  ) {}
+
+  async login(createLoginDto: CreateLoginDto) {
+    const { email, password } = createLoginDto;
+
+    const user = await this.prisma.usuario.findUnique({ where: { email } });
+    if (!user) throw new UnauthorizedException('Credenciales inválidas');
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) throw new UnauthorizedException('Credenciales inválidas');
+
+    const payload = { sub: user.id.toString(), email: user.email };
+    const token = await this.jwtService.signAsync(payload);
+
+    return {
+      access_token: token,
+      user: {
+        id: user.id.toString(),
+        email: user.email,
+        nombre_usuario: user.nombre_usuario,
+      },
+    };
+  }
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\login\dto\create-login.dto.ts
+============================================================
+import { ApiProperty } from '@nestjs/swagger';
+
+export class CreateLoginDto {
+  @ApiProperty({ example: 'juan@mail.com' })
+  email: string;
+
+  @ApiProperty({ example: 'Password123!' })
+  password: string;
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\login\dto\update-login.dto.ts
+============================================================
+import { PartialType } from '@nestjs/swagger';
+import { CreateLoginDto } from './create-login.dto';
+
+export class UpdateLoginDto extends PartialType(CreateLoginDto) {}
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\login\entities\login.entity.ts
+============================================================
+export class Login {}
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\prisma\prisma.module.ts
+============================================================
+import { Module, Global } from '@nestjs/common';
+import { PrismaService } from './prisma.service';
+
+@Global()
+@Module({
+  providers: [PrismaService],
+  exports: [PrismaService],
+})
+export class PrismaModule {}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\prisma\prisma.service.ts
+============================================================
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
+
+@Injectable()
+export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+
+  async onModuleInit() {
+    await this.$connect();
+  }
+
+  async onModuleDestroy() {
+    await this.$disconnect();
+  }
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\register\register.controller.spec.ts
+============================================================
+import { Test, TestingModule } from '@nestjs/testing';
+import { RegisterController } from './register.controller';
+import { RegisterService } from './register.service';
+
+describe('RegisterController', () => {
+  let controller: RegisterController;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [RegisterController],
+      providers: [RegisterService],
+    }).compile();
+
+    controller = module.get<RegisterController>(RegisterController);
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+});
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\register\register.controller.ts
+============================================================
+import { Controller, Post, Body } from '@nestjs/common';
+import { RegisterService } from './register.service';
+import { CreateRegisterDto } from './dto/create-register.dto';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+
+@ApiTags('register')
+@Controller('register')
+export class RegisterController {
+  constructor(private readonly registerService: RegisterService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Registrar nuevo usuario' })
+  create(@Body() createRegisterDto: CreateRegisterDto) {
+    return this.registerService.create(createRegisterDto);
+  }
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\register\register.module.ts
+============================================================
+import { Module } from '@nestjs/common';
+import { RegisterService } from './register.service';
+import { RegisterController } from './register.controller';
+import { PrismaModule } from 'src/prisma/prisma.module';
+
+@Module({
+  imports: [PrismaModule],
+  controllers: [RegisterController],
+  providers: [RegisterService],
+})
+export class RegisterModule {}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\register\register.service.spec.ts
+============================================================
+import { Test, TestingModule } from '@nestjs/testing';
+import { RegisterService } from './register.service';
+
+describe('RegisterService', () => {
+  let service: RegisterService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [RegisterService],
+    }).compile();
+
+    service = module.get<RegisterService>(RegisterService);
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+});
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\register\register.service.ts
+============================================================
+import { Injectable, ConflictException } from '@nestjs/common';
+import { CreateRegisterDto } from './dto/create-register.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import * as bcrypt from 'bcrypt';
+
+@Injectable()
+export class RegisterService {
+  constructor(private prisma: PrismaService) {}
+
+  async create(createRegisterDto: CreateRegisterDto) {
+    const { nombre_usuario, email, password, nombre, apellido } = createRegisterDto;
+
+    // Verificar si el email ya existe
+    const usuarioExistente = await this.prisma.usuario.findUnique({ where: { email } });
+    if (usuarioExistente) throw new ConflictException('El email ya está registrado');
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Crear usuario y perfil en una sola transacción
+    const resultado = await this.prisma.$transaction(async (tx) => {
+      const usuario = await tx.usuario.create({
+        data: {
+          nombre_usuario,
+          email,
+          password: hashedPassword,
+        },
+      });
+
+      const perfil = await tx.perfilUsuario.create({
+        data: {
+          usuarioId: usuario.id,
+          nombre,
+          apellido,
+          pfp: '',
+          id_empresa: BigInt(0),
+          hora_entrada: new Date(),
+          hora_salida: new Date(),
+        },
+      });
+
+      return { usuario, perfil };
+    });
+
+    return {
+      id: resultado.usuario.id.toString(),
+      nombre_usuario: resultado.usuario.nombre_usuario,
+      email: resultado.usuario.email,
+      nombre: resultado.perfil.nombre,
+      apellido: resultado.perfil.apellido,
+    };
+  }
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\register\dto\create-register.dto.ts
+============================================================
+import { ApiProperty } from '@nestjs/swagger';
+
+export class CreateRegisterDto {
+  @ApiProperty({ example: 'juanito123' })
+  nombre_usuario: string;
+
+  @ApiProperty({ example: 'juan@mail.com' })
+  email: string;
+
+  @ApiProperty({ example: 'Password123!' })
+  password: string;
+
+  @ApiProperty({ example: 'Juan' })
+  nombre: string;
+
+  @ApiProperty({ example: 'Pérez' })
+  apellido: string;
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\register\dto\update-register.dto.ts
+============================================================
+import { PartialType } from '@nestjs/swagger';
+import { CreateRegisterDto } from './create-register.dto';
+
+export class UpdateRegisterDto extends PartialType(CreateRegisterDto) {}
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\register\entities\register.entity.ts
+============================================================
+export class Register {}
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\userprofile\userprofile.controller.spec.ts
+============================================================
+import { Test, TestingModule } from '@nestjs/testing';
+import { UserprofileController } from './userprofile.controller';
+import { UserprofileService } from './userprofile.service';
+
+describe('UserprofileController', () => {
+  let controller: UserprofileController;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [UserprofileController],
+      providers: [UserprofileService],
+    }).compile();
+
+    controller = module.get<UserprofileController>(UserprofileController);
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+});
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\userprofile\userprofile.controller.ts
+============================================================
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { UserprofileService } from './userprofile.service';
+import { CreateUserprofileDto } from './dto/create-userprofile.dto';
+import { UpdateUserprofileDto } from './dto/update-userprofile.dto';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+
+@ApiTags('userprofile')
+@Controller('userprofile')
+export class UserprofileController {
+  constructor(private readonly userprofileService: UserprofileService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Crear perfil de usuario' })
+  create(@Body() createUserprofileDto: CreateUserprofileDto) {
+    return this.userprofileService.create(createUserprofileDto);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Obtener todos los perfiles' })
+  findAll() {
+    return this.userprofileService.findAll();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtener perfil por ID' })
+  findOne(@Param('id') id: string) {
+    return this.userprofileService.findOne(+id);
+  }
+
+  @Get('usuario/:usuarioId')
+  @ApiOperation({ summary: 'Obtener perfil por ID de usuario' })
+  findByUsuario(@Param('usuarioId') usuarioId: string) {
+    return this.userprofileService.findByUsuario(+usuarioId);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Actualizar perfil' })
+  update(@Param('id') id: string, @Body() updateUserprofileDto: UpdateUserprofileDto) {
+    return this.userprofileService.update(+id, updateUserprofileDto);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Eliminar perfil' })
+  remove(@Param('id') id: string) {
+    return this.userprofileService.remove(+id);
+  }
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\userprofile\userprofile.module.ts
+============================================================
+import { Module } from '@nestjs/common';
+import { UserprofileService } from './userprofile.service';
+import { UserprofileController } from './userprofile.controller';
+import { PrismaModule } from 'src/prisma/prisma.module';
+
+@Module({
+  imports: [PrismaModule],
+  controllers: [UserprofileController],
+  providers: [UserprofileService],
+})
+export class UserprofileModule {}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\userprofile\userprofile.service.spec.ts
+============================================================
+import { Test, TestingModule } from '@nestjs/testing';
+import { UserprofileService } from './userprofile.service';
+
+describe('UserprofileService', () => {
+  let service: UserprofileService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [UserprofileService],
+    }).compile();
+
+    service = module.get<UserprofileService>(UserprofileService);
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+});
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\userprofile\userprofile.service.ts
+============================================================
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateUserprofileDto } from './dto/create-userprofile.dto';
+import { UpdateUserprofileDto } from './dto/update-userprofile.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+
+@Injectable()
+export class UserprofileService {
+  constructor(private prisma: PrismaService) {}
+
+  async create(createUserprofileDto: CreateUserprofileDto) {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id: createUserprofileDto.usuarioId },
+    });
+    if (!usuario) throw new NotFoundException(`Usuario #${createUserprofileDto.usuarioId} no existe`);
+
+    return this.prisma.perfilUsuario.create({
+      data: createUserprofileDto,
+    });
+  }
+
+  findAll() {
+    return this.prisma.perfilUsuario.findMany({
+      include: { usuario: true },
+    });
+  }
+
+  async findOne(id: number) {
+    const perfil = await this.prisma.perfilUsuario.findUnique({
+      where: { id },
+      include: { usuario: true },
+    });
+    if (!perfil) throw new NotFoundException(`Perfil #${id} no encontrado`);
+    return perfil;
+  }
+
+  async findByUsuario(usuarioId: number) {
+    const perfil = await this.prisma.perfilUsuario.findUnique({
+      where: { usuarioId },
+      include: { usuario: true },
+    });
+    if (!perfil) throw new NotFoundException(`Perfil del usuario #${usuarioId} no encontrado`);
+    return perfil;
+  }
+
+  async update(id: number, updateUserprofileDto: UpdateUserprofileDto) {
+    await this.findOne(id);
+    return this.prisma.perfilUsuario.update({
+      where: { id },
+      data: updateUserprofileDto,
+    });
+  }
+
+  async remove(id: number) {
+    await this.findOne(id);
+    return this.prisma.perfilUsuario.delete({
+      where: { id },
+    });
+  }
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\userprofile\dto\create-userprofile.dto.ts
+============================================================
+import { ApiProperty } from '@nestjs/swagger';
+
+export class CreateUserprofileDto {
+  @ApiProperty({ example: '1' })
+  usuarioId: bigint;
+
+  @ApiProperty({ example: 'https://example.com/foto.jpg' })
+  pfp: string;
+
+  @ApiProperty({ example: '1' })
+  id_empresa: bigint;
+
+  @ApiProperty({ example: 'Juan' })
+  nombre: string;
+
+  @ApiProperty({ example: 'Pérez' })
+  apellido: string;
+
+  @ApiProperty({ example: '2026-04-02T08:00:00.000Z' })
+  hora_entrada: Date;
+
+  @ApiProperty({ example: '2026-04-02T17:00:00.000Z' })
+  hora_salida: Date;
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\userprofile\dto\update-userprofile.dto.ts
+============================================================
+import { PartialType } from '@nestjs/swagger';
+import { CreateUserprofileDto } from './create-userprofile.dto';
+
+export class UpdateUserprofileDto extends PartialType(CreateUserprofileDto) {}
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\userprofile\entities\userprofile.entity.ts
+============================================================
+export class Userprofile {}
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\users\users.controller.spec.ts
+============================================================
+import { Test, TestingModule } from '@nestjs/testing';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
+
+describe('UsersController', () => {
+  let controller: UsersController;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [UsersController],
+      providers: [UsersService],
+    }).compile();
+
+    controller = module.get<UsersController>(UsersController);
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+});
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\users\users.controller.ts
+============================================================
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+
+@ApiTags('users')
+@Controller('users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Crear usuario' })
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Obtener todos los usuarios' })
+  findAll() {
+    return this.usersService.findAll();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtener usuario por ID' })
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(+id);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Actualizar usuario' })
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(+id, updateUserDto);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Eliminar usuario' })
+  remove(@Param('id') id: string) {
+    return this.usersService.remove(+id);
+  }
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\users\users.module.ts
+============================================================
+import { Module } from '@nestjs/common';
+import { UsersService } from './users.service';
+import { UsersController } from './users.controller';
+import { PrismaModule } from 'src/prisma/prisma.module';
+
+
+
+@Module({
+  imports: [PrismaModule],
+  controllers: [UsersController],
+  providers: [UsersService],
+})
+export class UsersModule {}
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\users\users.service.spec.ts
+============================================================
+import { Test, TestingModule } from '@nestjs/testing';
+import { UsersService } from './users.service';
+
+describe('UsersService', () => {
+  let service: UsersService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [UsersService],
+    }).compile();
+
+    service = module.get<UsersService>(UsersService);
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+});
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\users\users.service.ts
+============================================================
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import * as bcrypt from 'bcrypt';
+
+@Injectable()
+export class UsersService {
+
+  constructor(private prisma: PrismaService) {}
+
+  async create(createUserDto: CreateUserDto) {
+  const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+  return this.prisma.usuario.create({
+    data: { ...createUserDto, password: hashedPassword },
+  });
+}
+
+  findAll() {
+    return this.prisma.usuario.findMany();
+  }
+
+  async findOne(id: number) {
+    const user = await this.prisma.usuario.findUnique({
+      where: { id },
+    });
+    if (!user) throw new NotFoundException(`Usuario #${id} no encontrado`);
+    return user;
+  }
+
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    await this.findOne(id); // valida que existe
+    return this.prisma.usuario.update({
+      where: { id },
+      data: updateUserDto,
+    });
+  }
+
+  async remove(id: number) {
+    await this.findOne(id); // valida que existe
+    return this.prisma.usuario.delete({
+      where: { id },
+    });
+  }
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\users\dto\create-user.dto.ts
+============================================================
+import { ApiProperty } from "@nestjs/swagger";
+export class CreateUserDto {
+    @ApiProperty({ example: "John Doe" })
+    nombre_usuario: string;
+
+    @ApiProperty({ example: ""})
+    email: string;
+
+    @ApiProperty({ example: "Password123!" })
+    password: string;
+}
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\users\dto\update-user.dto.ts
+============================================================
+import { PartialType } from '@nestjs/swagger';
+import { CreateUserDto } from './create-user.dto';
+
+export class UpdateUserDto extends PartialType(CreateUserDto) {}
+
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-back\src\users\entities\user.entity.ts
+============================================================
+export class User {}
+
+

@@ -1,0 +1,630 @@
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-front\components\buttons\navbar.tsx
+============================================================
+import Link from "next/link";
+
+type props = {
+  to:string;
+  label:string
+}  
+
+export default function ButtonNavBar(
+  {
+  to,
+  label
+  }:props  
+){
+  return(
+    <Link
+    className="flex justify-start items-center w-full py-2 col-span-1 "
+    href={`/${to}`}
+    >
+      <p className="ml-5 text-2xl font-light text-slate-900">{label}</p>
+    </Link>
+  ); 
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-front\components\calugas\caluga.tsx
+============================================================
+
+type props = {
+  label:string
+  valor:string;
+}  
+
+export default function Caluga(
+    {
+    label,
+    valor
+    }  :props
+){
+  return(
+    <div className="rounded grid grid-rows-2 bg-slate-300 w-2/3 h-2/3 text-slate-900 font-bold">
+      <div className="flex justify-center items-center row-span-1">
+        <p>{label}</p>
+      </div>
+      <div className="flex justify-center items-center row-span-1">
+        <p>{valor}</p>
+      </div>
+    </div>
+  )
+} 
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-front\components\forms\LoginForm.tsx
+============================================================
+import { useForm } from "react-hook-form";
+import DefaultInput from "../inputs/defaultInput";
+import EmailInput from "../inputs/emailInput";
+import Link from "next/link";
+
+type FormData = {
+  nombre: string;
+  apellido: string;
+  email: string;
+  password: string;
+};
+
+export default function LoginForm() {
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors }
+  } = useForm<FormData>();
+
+  const password = watch("password");
+
+  const rules = [
+    { label: "mayúscula", regex: /[A-Z]/ },
+    { label: "número", regex: /[0-9]/ },
+    { label: "símbolo", regex: /[^A-Za-z0-9]/ }
+  ];
+
+  const onSubmit = (data: FormData) => {
+    console.log(data);
+  };
+
+  const validatePassword = (value: string) => {
+    if (value.length < 8) return "Mínimo 8 caracteres";
+
+    for (let rule of rules) {
+      if (!rule.regex.test(value)) {
+        return `Debe contener ${rule.label}`;
+      }
+    }
+
+    return true;
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className=" rounded-lg bg-gray-100 
+      
+      font-sans text-black font-medium"
+    >
+      <div className="form">
+        <h2 className="label">
+          Iniciar Sesión
+        <hr className="hr"/>
+        </h2>
+        {/* Email */}
+        <div className="">
+          <p className="">Email</p>
+          <div className="">
+            <EmailInput
+              {...register("email", {
+                required: "Email requerido",
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Email inválido"
+                }
+              })}
+              placeholder="Correo electrónico"
+              style="w-1/1 rounded-xs"
+            />
+          </div>
+          {errors.email && <span className=" text-slate-400 text-xs h-30">{errors.email.message}</span>}
+        </div>
+              
+        {/* Password */}
+        <div className="">
+          <p className=" ">Contraseña</p>
+          <div className="">
+            <DefaultInput
+              type="password"
+              {...register("password", {
+                validate: validatePassword
+              })}
+              placeholder="Escribe tu contraseña"
+              style={` w-1/1 rounded-xs border-2 ${
+                errors.password ? "border-red-500" : "border-slate-400"
+              }`}
+            />
+          </div>
+          {errors.password && <span className=" text-slate-400 text-xs h-30">{errors.password.message}</span>}
+        </div>
+
+        {/* Submit */}
+          <button
+            type="submit"
+            className="bg-indigo-900 text-white px-4 py-2 rounded"
+          >
+            Iniciar sesión
+          </button>
+          <label htmlFor="">¿No tienes cuenta?</label>
+          <Link href="/register">
+            <button
+              className="bg-slate-400 text-black px-4 py-2 rounded"
+              >
+              Registrarse
+            </button>
+          </Link>
+        </div>
+
+    </form>
+  );
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-front\components\forms\RegisterForm.tsx
+============================================================
+import { useForm } from "react-hook-form";
+import DefaultInput from "../inputs/defaultInput";
+import EmailInput from "../inputs/emailInput";
+import Link from "next/link";
+
+type FormData = {
+  nombre: string;
+  apellido: string;
+  email: string;
+  password: string;
+};
+
+export default function RegisterForm() {
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors }
+  } = useForm<FormData>();
+
+  const password = watch("password");
+
+  const rules = [
+    { label: "mayúscula", regex: /[A-Z]/ },
+    { label: "número", regex: /[0-9]/ },
+    { label: "símbolo", regex: /[^A-Za-z0-9]/ }
+  ];
+
+  // const onSubmit = (data: FormData) => {
+  //   console.log(data);
+  // };
+const onSubmit = async (data: FormData) => {
+  // 🔹 Convertimos los datos al formato de la API
+  const payload = {
+    nombre_usuario: `${data.nombre} ${data.apellido}`,
+    email: data.email,
+    password: data.password,
+  };
+
+  try {
+    // 🔹 Enviamos a la API
+    const response = await fetch("http://localhost:3000/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+
+    console.log(result);
+
+    if (!response.ok) {
+      alert("Error al registrar ❌");
+      return;
+    }
+
+    alert("Usuario registrado correctamente 🚀");
+
+  } catch (error) {
+    console.error(error);
+    alert("Error de conexión ❌");
+  }
+};
+  const validatePassword = (value: string) => {
+    if (value.length < 8) return "Mínimo 8 caracteres";
+
+    for (let rule of rules) {
+      if (!rule.regex.test(value)) {
+        return `Debe contener ${rule.label}`;
+      }
+    }
+
+    return true;
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className=" rounded-lg bg-gray-100 
+      
+      font-sans text-black font-medium"
+    >
+      <div className="form">
+        <h2 className="label">
+          Registrar Usuario
+        </h2>
+        <hr className="hr"/>
+
+        {/* Nombre */}
+        <div className="">
+          <p className="">Nombre</p>
+          <div className="">
+            <DefaultInput
+              {...register("nombre", { required: "Nombre requerido" })}
+              placeholder="Escribe tu nombre"
+              style="rounded-xs border-2 border-slate-400 w-1/1"
+            />
+          </div>
+          {errors.nombre && <span className="text-slate-400 text-xs h-30">{errors.nombre.message}</span>}
+        </div>
+
+        {/* Apellido */}
+        <div className="">
+          <p className="">Apellido</p>
+          <div className="">
+            <DefaultInput
+              {...register("apellido", { required: "Apellido requerido" })}
+              placeholder="Escribe tu apellido"
+              style=" rounded-xs border-2 border-slate-400 w-1/1"
+            />
+          </div>
+          {errors.apellido && <span className="text-slate-400 text-xs h-30">{errors.apellido.message}</span>}
+        </div>
+
+        {/* Email */}
+        <div className="">
+          <p className="">Email</p>
+          <div className="">
+            <EmailInput
+              {...register("email", {
+                required: "Email requerido",
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Email inválido"
+                }
+              })}
+              placeholder="tu Email con @"
+              style="w-1/1 rounded-xs"
+            />
+          </div>
+          {errors.email && <span className=" text-slate-400 text-xs h-30">{errors.email.message}</span>}
+        </div>
+
+        {/* Password */}
+        <div className="">
+          <p className="">Contraseña</p>
+          <div className="">
+            <DefaultInput
+              type="password"
+              {...register("password", {
+                validate: validatePassword
+              })}
+              placeholder="Escribe tu contraseña"
+              style={` w-1/1 rounded-xs border-2 ${
+                errors.password ? "border-red-500" : "border-slate-400"
+              }`}
+            />
+          </div>
+          {errors.password && <span className=" text-slate-400 text-xs h-30">{errors.password.message}</span>}
+        </div>
+
+        {/* Submit */}
+          <button
+            type="submit"
+            className="bg-indigo-900 text-white px-4 py-2 rounded"
+          >
+            Registrarse
+          </button>
+          <label htmlFor="">¿Ya tienes cuenta?</label>
+          <Link href="/login">
+            <button
+              className="bg-slate-400 text-black px-4 py-2 rounded"
+              >
+              Iniciar sesion
+            </button>
+          </Link>
+        </div>
+
+    </form>
+  );
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-front\components\inputs\defaultInput.tsx
+============================================================
+import { forwardRef } from "react";
+
+const DefaultInput = forwardRef<HTMLInputElement, any>(
+  ({ style, ...props }, ref) => {
+    return <input ref={ref} {...props} className={style} />;
+  }
+);
+
+export default DefaultInput;
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-front\components\inputs\emailInput.tsx
+============================================================
+import { forwardRef } from "react";
+import { isEmail } from "./InputBehavior";
+
+const EmailInput = forwardRef<HTMLInputElement, any>(
+  ({ value = "", style, ...props }, ref) => {
+    return (
+      <input
+        ref={ref}
+        {...props}
+        className={`${style} ${isEmail(value)}`}
+      />
+    );
+  }
+);
+
+export default EmailInput;
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-front\components\inputs\InputBehavior.tsx
+============================================================
+export function isEmail(value?: string) {
+  if (!value || value.trim() === "") {
+    return "border-solid border-2 border-slate-400";
+  }
+
+  const isEmailValidation = value.includes("@");
+
+  return isEmailValidation
+    ? "border-solid border-2 border-sky-500"
+    : "border-solid border-2 border-rose-500";
+}
+type Rule = {
+  label: string;
+  regex: RegExp;
+};
+
+export function isValidPassword(
+  value: string,
+  minLength: number,
+  requiredCharacters: Rule[]
+) {
+  if (!value || value.trim() === "") {
+    return "border-2 border-slate-400";
+  }
+
+  if (value.length < minLength) {
+    return "border-2 border-rose-500";
+  }
+
+  for (const rule of requiredCharacters) {
+    if (!rule.regex.test(value)) {
+      return "border-2 border-rose-500";
+    }
+  }
+
+  return "border-2 border-sky-500";
+}
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-front\components\inputs\passwordInput.tsx
+============================================================
+import { isEmail } from "./InputBehavior"
+
+type props = {
+  value:string;
+  type:string;
+  placeholder?:string;
+  onChange:(value: string) => void;
+  style:string;
+}
+export default function EmailInput(
+  {
+    value,
+    type,
+    placeholder,
+    onChange,
+    style
+  }:props){
+  
+  return(
+      <input 
+      value={value}
+      type={type}
+      placeholder={placeholder}
+      onChange={(e)=> onChange(
+        e.target.value
+      )}
+      className={`${style} ${isEmail(value)}`}
+      />
+    )
+  }
+
+============================================================
+ARCHIVO: C:\Users\diego\Documents\Diego\DUOC\TecnicasDeCalidadDeSF\attendance-mgmt-front\components\tables\DefaultTable.tsx
+============================================================
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+  ColumnDef,
+  SortingState,
+  ColumnFiltersState,
+} from "@tanstack/react-table";
+import { useState } from "react";
+
+type Props<TData> = {
+  data: TData[];
+  columns: ColumnDef<TData, any>[];
+  enableSorting?: boolean;
+  enableFiltering?: boolean;
+  enablePagination?: boolean;
+  pageSize?: number;
+};
+
+export default function DefaultTable<TData>({
+  data,
+  columns,
+  enableSorting = true,
+  enableFiltering = false,
+  enablePagination = false,
+  pageSize = 10,
+}: Props<TData>) {
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  const table = useReactTable({
+    data,
+    columns,
+    state: {
+      sorting,
+      columnFilters,
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: enableSorting ? getSortedRowModel() : undefined,
+    getFilteredRowModel: enableFiltering ? getFilteredRowModel() : undefined,
+    getPaginationRowModel: enablePagination
+      ? getPaginationRowModel()
+      : undefined,
+    initialState: {
+      pagination: { pageSize },
+    },
+  });
+
+  return (
+    <div className="overflow-x-auto rounded-lg border border-gray-200">
+      <table className="min-w-full divide-y divide-gray-200 text-sm">
+        <thead className="bg-gray-50">
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <th
+                  key={header.id}
+                  className="px-4 py-3 text-left font-semibold text-gray-600 select-none"
+                  onClick={
+                    enableSorting
+                      ? header.column.getToggleSortingHandler()
+                      : undefined
+                  }
+                  style={{ cursor: enableSorting ? "pointer" : "default" }}
+                >
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                  {enableSorting && (
+                    <span className="ml-1 text-gray-400">
+                      {{ asc: "↑", desc: "↓" }[
+                        header.column.getIsSorted() as string
+                      ] ?? "↕"}
+                    </span>
+                  )}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+
+        <tbody className="divide-y divide-gray-100 bg-white">
+          {table.getRowModel().rows.map((row) => (
+            <tr key={row.id} className="hover:bg-gray-50 transition-colors">
+              {row.getVisibleCells().map((cell) => (
+                <td key={cell.id} className="px-4 py-3 text-gray-700">
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
+            </tr>
+          ))}
+
+          {table.getRowModel().rows.length === 0 && (
+            <tr>
+              <td
+                colSpan={columns.length}
+                className="px-4 py-8 text-center text-gray-400"
+              >
+                No hay datos para mostrar.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      {enablePagination && (
+        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50">
+          <span className="text-sm text-gray-500">
+            Página {table.getState().pagination.pageIndex + 1} de{" "}
+            {table.getPageCount()}
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+              className="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-100 transition-colors"
+            >
+              ← Anterior
+            </button>
+            <button
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+              className="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-100 transition-colors"
+            >
+              Siguiente →
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Ejemplo de uso ─────────────────────────────────────────────────────────
+
+type User = { id: number; name: string; email: string; role: string };
+
+const EXAMPLE_DATA: User[] = [
+  { id: 1, name: "Ana García",    email: "ana@example.com",    role: "Admin" },
+  { id: 2, name: "Luis Martínez", email: "luis@example.com",   role: "Editor" },
+  { id: 3, name: "María López",   email: "maria@example.com",  role: "Viewer" },
+  { id: 4, name: "Carlos Ruiz",   email: "carlos@example.com", role: "Editor" },
+];
+
+const EXAMPLE_COLUMNS: ColumnDef<User>[] = [
+  { accessorKey: "id",    header: "ID"     },
+  { accessorKey: "name",  header: "Nombre" },
+  { accessorKey: "email", header: "Email"  },
+  { accessorKey: "role",  header: "Rol"    },
+];
+
+export function ExampleUsage() {
+  return (
+    <DefaultTable
+      data={EXAMPLE_DATA}
+      columns={EXAMPLE_COLUMNS}
+      enableSorting
+      enablePagination
+      pageSize={3}
+    />
+  );
+}
+
+

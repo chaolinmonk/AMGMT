@@ -19,16 +19,6 @@ type Asistencia = {
   esAtrasado: boolean;
 };
 
-type Profile = {
-  usuarioId: number;
-  pfp: string;
-  id_empresa: bigint;
-  nombre: string;
-  apellido: string;
-  hora_entrada: string; // ISO string, ej: "2026-04-03T08:30:40.102Z"
-  hora_salida: string;
-};
-
 // ─── Columnas ─────────────────────────────────────────────────────────────────
 
 const columns: ColumnDef<Asistencia>[] = [
@@ -47,37 +37,20 @@ const columns: ColumnDef<Asistencia>[] = [
   },
 ];
 
-// ─── Componente interno ───────────────────────────────────────────────────────
+// ─── Componente interno (ya sabe que hay sesión) ──────────────────────────────
 
 function MainPanelContent() {
   const { user, token, logout } = useAuth();
   const router = useRouter();
 
   const [asistencias, setAsistencias] = useState<Asistencia[]>([]);
-  const [profile, setProfile]         = useState<Profile | null>(null);
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState<string | null>(null);
   const [registrando, setRegistrando] = useState(false);
 
   useEffect(() => {
-    fetchPerfilUsuario();
     fetchAsistencias();
   }, []);
-
-  // Trae el perfil del usuario (incluye hora_entrada y hora_salida esperadas)
-  const fetchPerfilUsuario = async () => {
-    try {
-      const response = await fetch(
-        `http://minguipc:3000/userprofile/usuario/${user!.id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (!response.ok) throw new Error("Error al obtener perfil");
-      const data: Profile = await response.json();
-      setProfile(data);
-    } catch (err: any) {
-      console.error("Error cargando perfil:", err.message);
-    }
-  };
 
   // Trae solo las asistencias del usuario logueado
   const fetchAsistencias = async () => {
@@ -98,31 +71,13 @@ function MainPanelContent() {
     }
   };
 
-  /**
-   * Compara la hora actual (UTC) con la hora_entrada del perfil (UTC).
-   * Solo compara HH:mm — ignora fecha y segundos.
-   * Retorna true si el usuario marca entrada después de la hora límite.
-   */
-  const esEntradaAtrasada = (): boolean => {
-    if (!profile?.hora_entrada) return false;
-
-    const ahora        = new Date();
-    const horaEsperada = new Date(profile.hora_entrada);
-
-    const minutosAhora    = ahora.getUTCHours() * 60 + ahora.getUTCMinutes();
-    const minutosEsperado = horaEsperada.getUTCHours() * 60 + horaEsperada.getUTCMinutes();
-
-    return minutosAhora > minutosEsperado;
-  };
-
   // Registra entrada o salida con la hora actual del sistema
   const registrarAsistencia = async (tipo: "entrada" | "salida") => {
     setRegistrando(true);
     try {
-      const ahora      = new Date().toISOString();
-      const esAtrasado = tipo === "entrada" ? esEntradaAtrasada() : false;
+      const ahora = new Date().toISOString(); // hora actual del sistema
 
-      const response = await fetch("http://minguipc:3000/assistance", {
+      const response = await fetch("http://localhost:3000/assistance", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -132,14 +87,13 @@ function MainPanelContent() {
           usuarioId: user!.id,
           fecha: ahora,
           tipo,
-          esAtrasado,
+          esAtrasado: false,
         }),
       });
 
       if (!response.ok) throw new Error("Error al registrar asistencia");
 
-      if (esAtrasado) alert("⚠️ Entrada registrada como atrasado.");
-
+      // Recargar tabla tras registrar
       await fetchAsistencias();
     } catch (err: any) {
       alert(`Error: ${err.message}`);
@@ -153,37 +107,13 @@ function MainPanelContent() {
     router.push("/login");
   };
 
-  // ── Estadísticas ──────────────────────────────────────────────────────────
+  // ── Estadísticas ─────────────────────────────────────────────────────────
+  const entradas  = asistencias.filter((a) => a.tipo === "entrada").length;
+  const salidas   = asistencias.filter((a) => a.tipo === "salida").length;
   const atrasados = asistencias.filter((a) => a.esAtrasado).length;
 
-  const calcularPromedioHora = (tipo: "entrada" | "salida"): string => {
-    const registros = asistencias.filter((a) => a.tipo === tipo);
-    if (registros.length === 0) return "—";
-
-    const totalMinutos = registros.reduce((acc, a) => {
-      const fecha = new Date(a.fecha);
-      return acc + fecha.getUTCHours() * 60 + fecha.getUTCMinutes();
-    }, 0);
-
-    const promedioMinutos = Math.round(totalMinutos / registros.length);
-    const horas   = Math.floor(promedioMinutos / 60).toString().padStart(2, "0");
-    const minutos = (promedioMinutos % 60).toString().padStart(2, "0");
-    return `${horas}:${minutos}`;
-  };
-
-  const promedioEntrada = calcularPromedioHora("entrada");
-  const promedioSalida  = calcularPromedioHora("salida");
-
   return (
-    <div className="
-      main
-      min-h-screen w-full
-      bg-slate-300
-      font-sans
-      grid
-      grid-cols-10
-      grid-rows-[repeat(12,minmax(0,1fr))]
-    ">
+    <div className="main h-screen w-screen bg-slate-300 font-sans grid grid-cols-10 grid-rows-12">
       {/* Header */}
       <div className="bg-indigo-900 text-4xl header flex justify-between items-center px-8 col-start-1 row-start-1 col-span-10 row-span-1">
         <p>AssistanceMGMT</p>
@@ -233,29 +163,18 @@ function MainPanelContent() {
           )}
         </div>
 
-        {/* Hora actual y hora límite */}
+        {/* Hora actual visible */}
         <p className="text-slate-950 text-sm">
           Hora del sistema:{" "}
           <strong>{new Date().toLocaleString("es-CL")}</strong>
-          {profile?.hora_entrada && (
-            <span className="ml-2 text-slate-700">
-              | Hora límite entrada:{" "}
-              <strong>
-                {new Date(profile.hora_entrada).toLocaleTimeString("es-CL", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  timeZone: "UTC",
-                })}
-              </strong>
-            </span>
-          )}
+          {" "}— se usará al marcar entrada/salida.
         </p>
 
         {/* Calugas */}
         <div className="grid grid-cols-3 gap-4 place-items-center">
-          <Caluga label="Hora Promedio entrada" valor={promedioEntrada} />
-          <Caluga label="Hora Promedio salidas"  valor={promedioSalida} />
-          <Caluga label="Atrasados"              valor={String(atrasados)} />
+          <Caluga label="Hora Promedio entrada"  valor={String(entradas)} />
+          <Caluga label="Hora Promedio salidas"   valor={String(salidas)} />
+          <Caluga label="Atrasados" valor={String(atrasados)} />
         </div>
 
         {/* Tabla */}
