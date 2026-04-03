@@ -26,10 +26,43 @@ export default function RegisterForm() {
     { label: "símbolo", regex: /[^A-Za-z0-9]/ }
   ];
 
-  const onSubmit = (data: FormData) => {
-    console.log(data);
+  // const onSubmit = (data: FormData) => {
+  //   console.log(data);
+  // };
+const onSubmit = async (data: FormData) => {
+  // 🔹 Convertimos los datos al formato de la API
+  const payload = {
+    nombre_usuario: `${data.nombre} ${data.apellido}`,
+    email: data.email,
+    password: data.password,
   };
 
+  try {
+    // 🔹 Enviamos a la API
+    const response = await fetch("http://localhost:3000/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+
+    console.log(result);
+
+    if (!response.ok) {
+      alert("Error al registrar ❌");
+      return;
+    }
+
+    alert("Usuario registrado correctamente 🚀");
+
+  } catch (error) {
+    console.error(error);
+    alert("Error de conexión ❌");
+  }
+};
   const validatePassword = (value: string) => {
     if (value.length < 8) return "Mínimo 8 caracteres";
 
