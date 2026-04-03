@@ -50,9 +50,10 @@ export default function LoginForm() {
       font-sans text-black font-medium"
     >
       <div className="form">
-        <div className="">
+        <h2 className="label">
           Iniciar Sesión
-        </div>
+        <hr className="hr"/>
+        </h2>
         {/* Email */}
         <div className="">
           <p className="">Email</p>
@@ -65,13 +66,13 @@ export default function LoginForm() {
                   message: "Email inválido"
                 }
               })}
-              placeholder="tu Email con @"
+              placeholder="Correo electrónico"
               style="w-1/1 rounded-xs"
             />
           </div>
           {errors.email && <span className=" text-slate-400 text-xs h-30">{errors.email.message}</span>}
         </div>
-
+              
         {/* Password */}
         <div className="">
           <p className=" ">Contraseña</p>
@@ -91,22 +92,21 @@ export default function LoginForm() {
         </div>
 
         {/* Submit */}
-        <div className="flex justify-evenly items-center">
           <button
             type="submit"
             className="bg-indigo-900 text-white px-4 py-2 rounded"
           >
             Iniciar sesión
           </button>
+          <label htmlFor="">¿No tienes cuenta?</label>
           <Link href="/register">
             <button
               className="bg-slate-400 text-black px-4 py-2 rounded"
               >
-              No tengo cuenta
+              Registrarse
             </button>
           </Link>
         </div>
-      </div>
 
     </form>
   );

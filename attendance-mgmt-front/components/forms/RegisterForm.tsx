@@ -78,19 +78,20 @@ const onSubmit = async (data: FormData) => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="col-start-3 col-span-2 row-start-2 row-span-3 rounded-lg bg-gray-100 
-      flex justify-center
+      className=" rounded-lg bg-gray-100 
+      
       font-sans text-black font-medium"
     >
-      <div className="w-4/5 grid grid-cols-1 grid-rows-6">
-        <div className="row-span-1 flex items-center justify-center">
-          Registrarse
-        </div>
+      <div className="form">
+        <h2 className="label">
+          Registrar Usuario
+        </h2>
+        <hr className="hr"/>
 
         {/* Nombre */}
-        <div className="row-span-1 flex flex-col justify-center">
-          <p className=" h-20">Nombre</p>
-          <div className="flex justify-center h-50">
+        <div className="">
+          <p className="">Nombre</p>
+          <div className="">
             <DefaultInput
               {...register("nombre", { required: "Nombre requerido" })}
               placeholder="Escribe tu nombre"
@@ -101,9 +102,9 @@ const onSubmit = async (data: FormData) => {
         </div>
 
         {/* Apellido */}
-        <div className="row-span-1 flex flex-col justify-center">
-          <p className=" h-20">Apellido</p>
-          <div className="flex justify-center h-50">
+        <div className="">
+          <p className="">Apellido</p>
+          <div className="">
             <DefaultInput
               {...register("apellido", { required: "Apellido requerido" })}
               placeholder="Escribe tu apellido"
@@ -114,9 +115,9 @@ const onSubmit = async (data: FormData) => {
         </div>
 
         {/* Email */}
-        <div className="row-span-1 flex flex-col justify-center">
-          <p className=" h-20">Email</p>
-          <div className="flex justify-center h-50">
+        <div className="">
+          <p className="">Email</p>
+          <div className="">
             <EmailInput
               {...register("email", {
                 required: "Email requerido",
@@ -133,9 +134,9 @@ const onSubmit = async (data: FormData) => {
         </div>
 
         {/* Password */}
-        <div className="row-span-1 flex flex-col justify-center">
-          <p className=" h-20">Contraseña</p>
-          <div className="flex justify-center h-50">
+        <div className="">
+          <p className="">Contraseña</p>
+          <div className="">
             <DefaultInput
               type="password"
               {...register("password", {
@@ -151,22 +152,21 @@ const onSubmit = async (data: FormData) => {
         </div>
 
         {/* Submit */}
-        <div className="flex justify-evenly items-center">
           <button
             type="submit"
             className="bg-indigo-900 text-white px-4 py-2 rounded"
           >
             Registrarse
           </button>
+          <label htmlFor="">¿Ya tienes cuenta?</label>
           <Link href="/login">
             <button
               className="bg-slate-400 text-black px-4 py-2 rounded"
               >
-              Ya tengo cuenta
+              Iniciar sesion
             </button>
           </Link>
         </div>
-      </div>
 
     </form>
   );

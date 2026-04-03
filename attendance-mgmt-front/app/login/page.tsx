@@ -9,7 +9,7 @@ export default function Home() {
         <p>AssistanceMGMT</p>
       </div>
       <div className="main">
-      <div className="form">
+      <div className="">
         <LoginForm/>
       </div>
     </div>
