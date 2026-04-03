@@ -7,7 +7,13 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class AssistanceService {
   constructor(private prisma: PrismaService) {}
 
-  create(createAssistanceDto: CreateAssistanceDto) {
+  c
+  async create(createAssistanceDto: CreateAssistanceDto) {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id: createAssistanceDto.usuarioId },
+    });
+    if (!usuario) throw new NotFoundException(`Usuario #${createAssistanceDto.usuarioId} no existe`);
+
     return this.prisma.asistencia.create({
       data: createAssistanceDto,
     });
